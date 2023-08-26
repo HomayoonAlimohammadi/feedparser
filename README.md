@@ -9,10 +9,15 @@ Create and customize a `config.json` file to your likings and run the program.
 ## Python version
 ```bash
 pip install -r requirements.txt
-python3 main.py &
+python3 main.py
 ```
-Notice the `&` instruction. This way you can periodicly run this script on a remote server (cronjobs) and 
-enjoy all the feeds being broadcasted to your desired media (e.g. telegram channel)
+You can periodicly run this script on a remote server (cronjobs) and enjoy all the feeds being broadcasted to your desired media (e.g. telegram channel)
+
+To run the script every morning on 7 AM:
+```bash
+crontab -e
+* 7 * * * user cd path/to/main.py && python3 main.py
+```
 
 ## Sample config.json
 ```json
@@ -38,7 +43,6 @@ enjoy all the feeds being broadcasted to your desired media (e.g. telegram chann
 }
 ```
 
-`NOTICE`: cronjob interval and `since_days_before` should logically match otherwise you're gonna
-get duplicate posts.
+`NOTICE`: cronjob interval and `since_days_before` should logically match otherwise you're gonna get duplicate posts or you might miss a few.
 
 Enjoy!
