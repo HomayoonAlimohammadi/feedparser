@@ -55,30 +55,26 @@ def main():
 
     senders: List[Sender] = []
 
-    # senders.append(TelegramBotSender(
-    #     token=config.telegram_config.bot_token,
-    #     chan_id=config.telegram_config.channel_id,
-    #     parse_mode="HTML",
-    #     proxy=config.telegram_config.proxy,
-    # ))
+    senders.append(TelegramBotSender(
+        token=config.telegram_config.bot_token,
+        chan_id=config.telegram_config.channel_id,
+        parse_mode="HTML",
+        proxy=config.telegram_config.proxy,
+    ))
 
     senders.append(StdOutSender())
 
-    since = datetime.now() - timedelta(days=config.feed_config.initial_days_before) 
-    while True:
-        try:
-            fetch_and_send(
-                senders=senders,
-                feed_config=config.feed_config,
-                since=since,
-                sources=config.sources,
-                logger=logger
-            )
-            since = datetime.now()
-        except Exception as e:
-            logger.error(f"failed to fetch and send:", type(e), e)
+    try:
+        fetch_and_send(
+            senders=senders,
+            feed_config=config.feed_config,
+            since=datetime.now() - timedelta(days=config.feed_config.since_days_before) ,
+            sources=config.sources,
+            logger=logger
+        )
+    except Exception as e:
+        logger.error(f"failed to fetch and send:", type(e), e)
         
-        sleep(config.feed_config.refetch_sleep_seconds)
 
 
 

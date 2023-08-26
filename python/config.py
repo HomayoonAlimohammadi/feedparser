@@ -8,8 +8,7 @@ from colorama import init
 class FeedConfig:
     title_char_limit: int
     summary_char_limit: int
-    initial_days_before: int
-    refetch_sleep_seconds: int
+    since_days_before: int
     wait_per_entry_seconds: int
     wait_per_source_seconds: int
 
@@ -47,8 +46,7 @@ def load_config(path: str) -> Config:
     feed_config = FeedConfig(
         summary_char_limit=feed.get("summary_char_limit", 200),
         title_char_limit=feed.get("title_char_limit", 300),
-        initial_days_before=feed.get("initial_days_before", 30),
-        refetch_sleep_seconds=feed.get("refetch_sleep_seconds", 3600*60),
+        since_days_before=feed.get("since_days_before", 30),
         wait_per_entry_seconds=feed.get("wait_per_entry_seconds", 3),
         wait_per_source_seconds=feed.get("wait_per_source_seconds", 5),
     )
