@@ -8,3 +8,4 @@ requests==2.31.0
 sgmllib3k==1.0.0
 six==1.16.0
 urllib3==2.0.4
+langdetect==1.0.9

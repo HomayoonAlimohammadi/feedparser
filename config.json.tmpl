@@ -4,17 +4,19 @@
         "channel_id": "XXX",
         "proxy": {
             "enabled": false,
-            "socks_proxy": "socks5://127.0.0.1:56789"
+            "socks_proxy": "socks5://xxx.xxx.xxx.xxx:xxx"
         }
     },
     "sources": {
-        "Cloudflare": "https://blog.cloudflare.com/rss"
+        "The Go Blog": "https://go.dev/blog/feed.atom?format=xml",
     },
     "feed": {
         "title_char_limit": 200,
         "summary_char_limit": 300,
-        "since_days_before": 1,
-        "wait_per_entry_seconds": 3,
-        "wait_per_source_seconds": 5
+        "initial_days_before": 1,
+        "sleep_interval_seconds": 86400,
+        "wait_per_entry_seconds": 0.1,
+        "wait_per_source_seconds": 0.5
     }
 }
+

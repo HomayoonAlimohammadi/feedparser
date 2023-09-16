@@ -55,12 +55,12 @@ def main():
 
     senders: List[Sender] = []
 
-    senders.append(TelegramBotSender(
-        token=config.telegram_config.bot_token,
-        chan_id=config.telegram_config.channel_id,
-        parse_mode="HTML",
-        proxy=config.telegram_config.proxy,
-    ))
+    # senders.append(TelegramBotSender(
+    #     token=config.telegram_config.bot_token,
+    #     chan_id=config.telegram_config.channel_id,
+    #     parse_mode="HTML",
+    #     proxy=config.telegram_config.proxy,
+    # ))
 
     senders.append(StdOutSender())
 

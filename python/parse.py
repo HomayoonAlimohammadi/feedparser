@@ -3,6 +3,7 @@ import feedparser
 from dateutil import parser
 import logging
 from typing import List
+from langdetect import detect
 
 from config import FeedConfig
 from display import display_time
@@ -49,10 +50,9 @@ def parse(src: str, content: str, since: datetime, config: FeedConfig, logger: l
 
         # skip old entries
         if publish_date < since:
-            logger.info(f"article was too old: {publish_date=}, {since=}")
+            logger.info(f"article was too old - published at: {display_time(publish_date)}")
             continue
             
-
         title = entry.get("title", "")
         if len(title) > config.title_char_limit:
             title = title[:config.title_char_limit] + "..."
@@ -60,6 +60,13 @@ def parse(src: str, content: str, since: datetime, config: FeedConfig, logger: l
         summary = entry.get("summary", "")
         if len(summary) > config.summary_char_limit:
             summary = summary[:config.summary_char_limit] + "..."
+
+        try:
+            if not is_english(title):
+                continue
+        except LangDetectError as e:
+            logger.info(f"failed to detect language for `{title}`:", e)
+            continue
 
         link = entry.get("link", "")
 
@@ -72,3 +79,15 @@ def parse(src: str, content: str, since: datetime, config: FeedConfig, logger: l
         ))
     
     return feeds
+
+def is_english(s: str) -> bool:
+    try:
+        lang = detect(s)
+        print(s, ":", lang)
+        return lang == "en"
+    except Exception as e:
+        raise LangDetectError(e)
+    
+
+class LangDetectError(Exception):
+    ...
