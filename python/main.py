@@ -53,6 +53,8 @@ def main():
     config = load_config("../config.json")
     logger = setup_logger()
 
+    logger.info(f"started running at {datetime.now()}")
+
     senders: List[Sender] = []
 
     # senders.append(TelegramBotSender(
@@ -74,9 +76,9 @@ def main():
         )
     except Exception as e:
         logger.error(f"failed to fetch and send:", type(e), e)
-        
 
-
+    logger.info(f"finished running at {datetime.now()}")
+    
 
 if __name__ == "__main__":
     main()

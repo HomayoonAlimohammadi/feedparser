@@ -1,5 +1,6 @@
 config.json
 config.json.backup
+config.backup.json
 __pycache__
 *.log
 env/

@@ -38,7 +38,7 @@ def parse(src: str, content: str, since: datetime, config: FeedConfig, logger: l
     feed = feedparser.parse(content)
 
     entries = feed.get("entries", {})
-    logger.info(f"source: {src}, {len(entries)=}, feed keys: {feed.keys()}")
+    logger.info(f"Parsing `{src}`, number of results: {len(entries)}")
 
     feeds: List[Feed] = [] 
     for entry in reversed(entries):
@@ -48,15 +48,15 @@ def parse(src: str, content: str, since: datetime, config: FeedConfig, logger: l
             logger.error(f"failed to parse date: {e}")
             continue
 
-        # skip old entries
-        if publish_date < since:
-            logger.info(f"article was too old - published at: {display_time(publish_date)}")
-            continue
-            
         title = entry.get("title", "")
         if len(title) > config.title_char_limit:
             title = title[:config.title_char_limit] + "..."
 
+        # skip old entries
+        if publish_date < since:
+            logger.info(f"`{title}` was too old, published at: {display_time(publish_date)}")
+            continue
+        
         summary = entry.get("summary", "")
         if len(summary) > config.summary_char_limit:
             summary = summary[:config.summary_char_limit] + "..."
@@ -77,6 +77,8 @@ def parse(src: str, content: str, since: datetime, config: FeedConfig, logger: l
             link=link,
             publish_date=display_time(publish_date),
         ))
+
+    logger.info(f"Parsed {len(feeds)} up-to-date feeds from `{src}`")
     
     return feeds
 
@@ -87,7 +89,7 @@ def is_english(s: str) -> bool:
         return lang == "en"
     except Exception as e:
         raise LangDetectError(e)
-    
+
 
 class LangDetectError(Exception):
     ...
