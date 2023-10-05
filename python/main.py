@@ -4,6 +4,7 @@ import requests
 from typing import List
 import logging
 
+from display import display_time
 from sender import Sender, StdOutSender, TelegramBotSender 
 from config import load_config, Source, FeedConfig
 from parse import Feed, parse
@@ -53,7 +54,7 @@ def main():
     config = load_config("../config.json")
     logger = setup_logger()
 
-    logger.info(f"started running at {datetime.now()}")
+    logger.info(f"started running at {display_time(datetime.now())}")
 
     senders: List[Sender] = []
 
@@ -66,18 +67,29 @@ def main():
 
     senders.append(StdOutSender())
 
+    current_time = datetime.now()
+    # because some articles publish in the middle of day X
+    # but label as 00:00:00 of the same day
+    # this might cause in duplicates
+    since = current_time - timedelta(
+        days=config.feed_config.since_days_before,
+        hours=current_time.hour,
+        minutes=current_time.minute,
+        seconds=current_time.second,
+    )
+
     try:
         fetch_and_send(
             senders=senders,
             feed_config=config.feed_config,
-            since=datetime.now() - timedelta(days=config.feed_config.since_days_before) ,
+            since=since,
             sources=config.sources,
             logger=logger
         )
     except Exception as e:
         logger.error(f"failed to fetch and send:", type(e), e)
 
-    logger.info(f"finished running at {datetime.now()}")
+    logger.info(f"finished running at {display_time(datetime.now())}")
     
 
 if __name__ == "__main__":

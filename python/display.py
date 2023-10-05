@@ -15,4 +15,12 @@ def display_time(t: datetime):
     else:
         suffix = {1: "st", 2: "nd", 3: "rd"}.get(day % 10, "th")
 
-    return f"{month_names[month]} {day}{suffix} {year}"
+    hour, minute, second = t.hour, t.minute, t.second
+    if hour == 0:
+        hour = "00"
+    if minute == 0:
+        minute = "00"
+    if second == 0:
+        second = 0
+
+    return f"{month_names[month]} {day}{suffix} {year} {hour}:{minute}:{second}"
