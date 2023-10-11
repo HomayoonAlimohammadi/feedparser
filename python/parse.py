@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import feedparser
 from dateutil import parser
 import logging
@@ -52,10 +52,17 @@ def parse(src: str, content: str, since: datetime, config: FeedConfig, logger: l
         if len(title) > config.title_char_limit:
             title = title[:config.title_char_limit] + "..."
 
-        # skip old entries
-        if publish_date < since:
+        # skip old entries 
+        # The Go Blog has a bug that publishes a new article with the date of yesterday!
+        if publish_date < since and src != "The Go Blog":
             logger.info(f"`{title}` was too old, published at: {display_time(publish_date)}")
             continue
+        elif src == "The Go Blog":
+            if publish_date < since - timedelta(days=2):
+                logger.info(f"`{title}` was too old, published at: {display_time(publish_date)}")
+                continue
+            else:
+                logger.info(f"The Go Blog `{title}` was a tricky publish! published at:{display_time(publish_date)}")
         
         summary = entry.get("summary", "")
         if len(summary) > config.summary_char_limit:
