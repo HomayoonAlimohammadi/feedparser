@@ -4,10 +4,10 @@ import requests
 from typing import List
 import logging
 
-from display import display_time
 from sender import Sender, StdOutSender, TelegramBotSender 
 from config import load_config, Source, FeedConfig
 from parse import Feed, parse
+from display import display_time
 
 def setup_logger() -> logging.Logger:
     logger = logging.getLogger(__name__)
@@ -58,14 +58,14 @@ def main():
 
     senders: List[Sender] = []
 
-    # senders.append(TelegramBotSender(
-    #     token=config.telegram_config.bot_token,
-    #     chan_id=config.telegram_config.channel_id,
-    #     parse_mode="HTML",
-    #     proxy=config.telegram_config.proxy,
-    # ))
+    senders.append(TelegramBotSender(
+        token=config.telegram_config.bot_token,
+        chan_id=config.telegram_config.channel_id,
+        parse_mode="HTML",
+        proxy=config.telegram_config.proxy,
+    ))
 
-    senders.append(StdOutSender())
+    # senders.append(StdOutSender())
 
     current_time = datetime.now()
     # because some articles publish in the middle of day X

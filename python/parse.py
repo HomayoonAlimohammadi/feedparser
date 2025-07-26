@@ -63,7 +63,7 @@ def parse(src: str, content: str, since: datetime, config: FeedConfig, logger: l
                 continue
             else:
                 logger.info(f"The Go Blog `{title}` was a tricky publish! published at:{display_time(publish_date)}")
-        
+                
         summary = entry.get("summary", "")
         if len(summary) > config.summary_char_limit:
             summary = summary[:config.summary_char_limit] + "..."
