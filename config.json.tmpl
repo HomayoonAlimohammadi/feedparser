@@ -7,8 +7,20 @@
             "socks_proxy": "socks5://xxx.xxx.xxx.xxx:xxx"
         }
     },
+    "ai": {
+        "enabled": false,
+        "provider": "gemini",
+        "model": "gemini-1.5-flash",
+        "api_key": "YOUR_API_KEY",
+        "max_tokens": 1024,
+        "cache_enabled": true,
+        "cache_dir": ".cache/summaries",
+        "max_retries": 3,
+        "retry_delay_ms": 1000,
+        "rate_limit_rpm": 60
+    },
     "sources": {
-        "The Go Blog": "https://go.dev/blog/feed.atom?format=xml",
+        "The Go Blog": "https://go.dev/blog/feed.atom?format=xml"
     },
     "feed": {
         "title_char_limit": 200,
