@@ -1,0 +1,66 @@
+{
+    "digest": {
+        "per_fetcher": {
+            "enabled": true
+        },
+        "single_item": {
+            "enabled": true
+        }
+    },
+    "feed": {
+        "since_days_before": 7,
+        "summary_char_limit": 2000,
+        "title_char_limit": 200,
+        "wait_per_entry_seconds": 0,
+        "wait_per_source_seconds": 0
+    },
+    "ai": {
+        "enabled": false,
+        "provider": "gemini",
+        "model": "gemini-3-flash-preview",
+        "api_key": "xxx",
+        "max_tokens": 10000,
+        "cache_enabled": false,
+        "cache_dir": ".cache/summaries",
+        "max_retries": 3,
+        "retry_delay_ms": 1000,
+        "rate_limit_rpm": 60
+    },
+    "hacker_news": {
+        "enabled": true,
+        "keywords": ["kubernetes", "ai", "golang", "cloud"],
+        "min_points": 500
+    },
+    "reddit": {
+        "enabled": true,
+        "subreddits": ["kubernetes", "golang", "artificial"],
+        "keywords": ["kubernetes", "ai", "golang", "cloud"],
+        "min_score": 200
+    },
+    "feeds": [
+        {
+            "name": "The Go Blog",
+            "url": "https://go.dev/blog/feed.atom?format=xml"
+
+        },
+        {
+            "name": "CNCF Blog",
+            "url": "https://www.cncf.io/feed/"
+        },
+        {
+            "name": "The Sequence of AI",
+            "url": "https://thesequence.substack.com/feed"
+        }
+        
+    ],
+    "senders": {
+        "telegram": {
+            "enabled": false,
+            "bot_access_token": "xxx",
+            "channel_id": "xxx"
+        },
+        "stdout": {
+            "enabled": true
+        }
+    }
+}

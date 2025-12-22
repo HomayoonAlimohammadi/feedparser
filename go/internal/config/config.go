@@ -34,30 +34,64 @@ type AIConfig struct {
 
 // TelegramConfig holds Telegram bot settings.
 type TelegramConfig struct {
+	Enabled   bool   `json:"enabled"`
 	BotToken  string `json:"bot_access_token"`
 	ChannelID string `json:"channel_id"`
 }
 
-// Source represents an RSS/Atom feed source.
-type Source struct {
-	Name    string
-	FeedURL string
+// Feed represents an RSS/Atom feed source.
+type Feed struct {
+	Name    string `json:"name"`
+	FeedURL string `json:"url"`
+}
+
+// HackerNewsConfig holds Hacker News fetcher settings.
+type HackerNewsConfig struct {
+	Enabled   bool     `json:"enabled"`
+	Keywords  []string `json:"keywords"`   // Keywords to search for
+	MinPoints int      `json:"min_points"` // Minimum upvotes to include
+}
+
+// RedditConfig holds Reddit fetcher settings.
+type RedditConfig struct {
+	Enabled    bool     `json:"enabled"`
+	Subreddits []string `json:"subreddits"` // Subreddits to monitor
+	Keywords   []string `json:"keywords"`   // Keywords to search for
+	MinScore   int      `json:"min_score"`  // Minimum score to include
 }
 
 // Config is the root configuration structure.
 type Config struct {
-	Feed     FeedConfig     `json:"feed"`
-	AI       AIConfig       `json:"ai"`
-	Telegram TelegramConfig `json:"telegram"`
-	Sources  []Source       `json:"-"`
+	Feed       FeedConfig       `json:"feed"`
+	AI         AIConfig         `json:"ai"`
+	HackerNews HackerNewsConfig `json:"hacker_news"`
+	Reddit     RedditConfig     `json:"reddit"`
+	Feeds      []Feed           `json:"feeds"`
+	Senders    SendersConfig    `json:"senders"`
+	Digest     DigestConfig     `json:"digest"`
 }
 
-// configJSON is used for JSON unmarshaling with sources as a map.
-type configJSON struct {
-	Feed     FeedConfig        `json:"feed"`
-	AI       AIConfig          `json:"ai"`
-	Telegram TelegramConfig    `json:"telegram"`
-	Sources  map[string]string `json:"sources"`
+type DigestConfig struct {
+	PerFetcher PerFetcherDigestConfig `json:"per_fetcher"`
+	SingleItem SingleItemDigestConfig `json:"single_item"`
+}
+
+type PerFetcherDigestConfig struct {
+	Enabled       bool `json:"enabled"`
+	IncludeHeader bool `json:"include_header"`
+}
+
+type SingleItemDigestConfig struct {
+	Enabled bool `json:"enabled"`
+}
+
+type StdoutConfig struct {
+	Enabled bool `json:"enabled"`
+}
+
+type SendersConfig struct {
+	Telegram TelegramConfig `json:"telegram"`
+	Stdout   StdoutConfig   `json:"stdout"`
 }
 
 // Load reads and parses the config file from the given path.
@@ -67,16 +101,9 @@ func Load(path string) (*Config, error) {
 		return nil, fmt.Errorf("reading config file: %w", err)
 	}
 
-	var raw configJSON
-	if err := json.Unmarshal(data, &raw); err != nil {
+	var cfg Config
+	if err := json.Unmarshal(data, &cfg); err != nil {
 		return nil, fmt.Errorf("parsing config JSON: %w", err)
-	}
-
-	cfg := &Config{
-		Feed:     raw.Feed,
-		AI:       raw.AI,
-		Telegram: raw.Telegram,
-		Sources:  make([]Source, 0, len(raw.Sources)),
 	}
 
 	// Apply defaults
@@ -106,9 +133,6 @@ func Load(path string) (*Config, error) {
 	if cfg.AI.MaxRetries == 0 {
 		cfg.AI.MaxRetries = 3
 	}
-	if cfg.AI.RetryDelayMs == 0 {
-		cfg.AI.RetryDelayMs = 1000
-	}
 	if cfg.AI.RateLimitRPM == 0 {
 		cfg.AI.RateLimitRPM = 60
 	}
@@ -117,13 +141,5 @@ func Load(path string) (*Config, error) {
 	cfg.Feed.WaitPerEntry = time.Duration(cfg.Feed.WaitPerEntrySeconds * float64(time.Second))
 	cfg.Feed.WaitPerSource = time.Duration(cfg.Feed.WaitPerSourceSeconds * float64(time.Second))
 
-	// Convert sources map to slice
-	for name, url := range raw.Sources {
-		cfg.Sources = append(cfg.Sources, Source{
-			Name:    name,
-			FeedURL: url,
-		})
-	}
-
-	return cfg, nil
+	return &cfg, nil
 }

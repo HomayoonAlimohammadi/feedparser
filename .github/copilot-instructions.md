@@ -1,7 +1,7 @@
 # Copilot Instructions for Feed Parser
 
 ## Project Overview
-RSS/Atom feed aggregator that fetches feeds from tech blogs and broadcasts them to Telegram channels. Designed to run as a scheduled cron job on a remote server. Available in both Python and Go implementations.
+RSS/Atom feed aggregator that fetches feeds from tech blogs, Hacker News, and Reddit, then broadcasts them to Telegram channels. Designed to run as a scheduled cron job on a remote server. Available in both Python and Go implementations.
 
 ## Architecture
 
@@ -18,6 +18,7 @@ go/                  # Go implementation
 ├── internal/
 │   ├── config/config.go      # Config structs + JSON loader
 │   ├── feed/parser.go        # Feed parsing with gofeed lib
+│   ├── fetcher/              # Fetcher interface + HN/Reddit/RSS implementations
 │   ├── sender/               # Sender interface + implementations
 │   ├── summarizer/           # AI summarization (OpenAI, Gemini)
 │   ├── scraper/              # HTML content extraction
@@ -25,7 +26,7 @@ go/                  # Go implementation
 ├── Makefile                  # Build automation
 ```
 
-**Data Flow**: Load config → Fetch RSS → Filter by date/language → (Optional: Scrape article → AI summarize) → Broadcast to Telegram
+**Data Flow**: Load config → Fetch (RSS/HN/Reddit) → Filter by date/score → (Optional: Scrape article → AI summarize) → Broadcast to Telegram
 
 ## Key Patterns
 
@@ -60,10 +61,21 @@ type Summarizer interface {
 ```
 Implementations: `OpenAISummarizer`, `GeminiSummarizer`, `NoopSummarizer`
 
+### Fetcher Pattern (Go only)
+Content fetching uses a common interface to support multiple sources:
+```go
+type Fetcher interface {
+    Fetch(ctx context.Context, since time.Time) ([]Item, error)
+    Name() string
+}
+```
+Implementations: `RSSFetcher`, `HackerNewsFetcher`, `RedditFetcher`
+
 ### Feed Filtering
 - Entries filtered by `since_days_before` config value
 - English-only filtering via `langdetect` (Python) / placeholder (Go)
 - Special case: "The Go Blog" has 2-day grace period
+- HN/Reddit filtered by `min_points`/`min_score` thresholds
 
 ### Message Format
 Telegram messages use HTML parse mode:
@@ -71,6 +83,8 @@ Telegram messages use HTML parse mode:
 <b>{title}</b>
 {source}
 {publish_date}
+⬆️ {points} points | 💬 {comments} comments  <!-- For HN/Reddit -->
+🏷️ {keywords}                                 <!-- If keyword matched -->
 <b>TLDR:</b> {ai_summary.tldr}
 {ai_summary.full_summary}
 <b>Links:</b>
@@ -95,6 +109,29 @@ Telegram messages use HTML parse mode:
     "rate_limit_rpm": 60
 }
 ```
+
+## Hacker News & Reddit (Go only)
+
+### Configuration
+```json
+"hacker_news": {
+    "enabled": true,
+    "keywords": ["kubernetes", "ai", "golang"],
+    "min_points": 50
+},
+"reddit": {
+    "enabled": true,
+    "subreddits": ["kubernetes", "MachineLearning"],
+    "keywords": ["kubernetes", "llm"],
+    "min_score": 20
+}
+```
+
+### How It Works
+- **Hacker News**: Uses Algolia HN Search API to find stories matching keywords
+- **Reddit**: Uses Reddit JSON API to fetch from subreddits and search for keywords
+- Both sources filter by score/points threshold and date
+- Deduplicates results when keywords match the same article
 
 ### Summary Output
 - **TLDR**: Single paragraph key insight
